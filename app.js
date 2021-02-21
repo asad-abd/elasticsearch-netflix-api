@@ -71,54 +71,25 @@ app.get('/search-title/:title', function (req, res) {
   });
 
 //**************************************** part B *****************************************/
-//TV
-app.get('/paginate/tv', function (req, res) {
-    // Query using slop to allow for unexact matches 
-    client.search({
-    index: 'netflix',
-    body: {
-        "size": 5,
-        "query": {  
-            "match_phrase": {
-              "title": { query: req.params.title, slop: 5}
-            }
-      }
-    }
-   
-    }).then(function(resp) {
-        console.log("Successful query! Here is the response:", resp);
-        res.send(resp);
-    }, function(err) {
-        console.trace(err.message);
-        res.send(err.message);
-    });
-  });
-  
-//Mpvies
-app.get('/paginate/movies', function (req, res) {
-    // Query using slop to allow for unexact matches 
+// http://localhost:3000/paginate?pageno=2&pagesize=10&type=Movie
+//req.query.pagesize - TV or movies
+//req.query.type - name of the tv show or movie
+
+app.get('/paginate', function (req, res) {
+    var offset=(req.query.pageno-1) * req.query.pagesize;
     client.search({
     index: 'netflix',
     body: { 
         "from" : offset,
-        "size" : inp['pageSize'],
+        "size" : req.query.pagesize,
         "query": {
               "bool": { 
-                  "must": [{ "match":{ "type": inp['type'] } }]
+                  "must": [{ "match":{ "type": req.query.type } }]
               }
           },
         "sort": [{ "release_year" : { "order": "desc" } } ]
     }
     
-    /*{
-        "size": 5,
-        "query": {  
-            "match_phrase": {
-              "title": { query: req.params.title, slop: 5}
-            }
-      }*/
-    
-    
     }).then(function(resp) {
         console.log("Successful query! Here is the response:", resp);
         res.send(resp);
@@ -128,7 +99,7 @@ app.get('/paginate/movies', function (req, res) {
     });
   });
 
-
+    
 //**************************************** part C *****************************************/
 app.get('/custom', function (req, res) {
     // Query using slop to allow for unexact matches 
