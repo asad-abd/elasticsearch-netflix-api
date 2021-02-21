@@ -17,7 +17,7 @@ app.get('/', function (req, res) {
 //**************************************** part A *****************************************/
 
 // Route to search for Articles by title (Child proof)
-//http://localhost:3000/search-title/safe/Away (removes one PG movie compared to unsafe)
+//http://localhost:3000/search-title/safe/Away (this example removes one PG movie as compared to unsafe (next part))
 app.get('/search-title/safe/:random', function (req, res) {
     // Query using slop to allow for unexact matches 
     client.search({
@@ -36,7 +36,7 @@ app.get('/search-title/safe/:random', function (req, res) {
                 },
                 
               }
-      }
+        }
     }
    
     }).then(function(resp) {
@@ -47,7 +47,9 @@ app.get('/search-title/safe/:random', function (req, res) {
         res.send(err.message);
     });
   });
-// Route to search for Articles by title
+  
+// Adult version (Unsafe)
+// http://localhost:3000/search-title/Away 
 app.get('/search-title/:title', function (req, res) {
     // Query using slop to allow for unexact matches 
     client.search({
@@ -101,16 +103,71 @@ app.get('/paginate', function (req, res) {
 
     
 //**************************************** part C *****************************************/
-app.get('/custom', function (req, res) {
-    // Query using slop to allow for unexact matches 
+//a. Exact match Endpoint:
+// http://localhost:3000/custom/exact?field=title&value=Away
+// http://localhost:3000/custom/exact?field=director&value=David
+app.get('/custom/exact', function (req, res) {
+    var key={}
+    key[req.query.field]={query : req.query.value}
     client.search({
     index: 'netflix',
     body: {
-        "size": 5,
-        "query": {  
-            "match_phrase": {
-              "title": { query: req.params.title, slop: 5}
+        "query": {
+          "bool": { 
+            "must": [{ "match": key}]
+          }
+      },
+    }
+   
+    }).then(function(resp) {
+        console.log("Successful query! Here is the response:", resp);
+        res.send(resp);
+    }, function(err) {
+        console.trace(err.message);
+        res.send(err.message);
+    });
+  });
+
+//b. Prefix match Endpoint:
+// http://localhost:3000/custom/prefix?value=After
+// http://localhost:3000/custom/prefix?value=After%20a%20long
+// http://localhost:3000/custom/prefix?value=After%20a%20long%20absence
+app.get('/custom/prefix', function (req, res) {
+  client.search({
+    index: 'netflix',
+    body: {
+        "query": {
+          "match_phrase_prefix": {
+            "description": {
+              "query": req.query.value
             }
+          }
+        }
+    }
+   
+    }).then(function(resp) {
+        console.log("Successful query! Here is the response:", resp);
+        res.send(resp);
+    }, function(err) {
+        console.trace(err.message);
+        res.send(err.message);
+    });
+  });
+
+//c. Genre Matching Endpoint:
+// http://localhost:3000/custom/genre?q="TV AND Comedy"
+// http://localhost:3000/custom/genre?q="TV AND (Horror OR Korean)"
+// AND and OR must me all capital
+app.get('/custom/genre', function (req, res) {
+  
+  client.search({
+    index: 'netflix',
+    body: {
+      "query": {
+        "query_string" : {
+            "query" : req.query.q,
+            "default_field" : "listed_in"
+        }
       }
     }
    
@@ -122,6 +179,7 @@ app.get('/custom', function (req, res) {
         res.send(err.message);
     });
   });
+
 
 //**************************************** part C End *****************************************/
 
