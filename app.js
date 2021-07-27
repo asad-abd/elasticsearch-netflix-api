@@ -50,7 +50,7 @@ app.get('/search-title/safe/:random', function (req, res) {
   
 // Adult version (Unsafe)
 // http://localhost:3000/search-title/Away 
-app.get('/search-title/:title', function (req, res) {
+app.get('/search-title/:random', function (req, res) {
     // Query using slop to allow for unexact matches 
     client.search({
     index: 'netflix',
@@ -58,7 +58,7 @@ app.get('/search-title/:title', function (req, res) {
         "size": 5,
         "query": {  
             "match_phrase": {
-              "title": { query: req.params.title, slop: 5}
+              "title": { query: req.params.random, slop: 5}
             }
       }
     }
@@ -143,9 +143,7 @@ app.get('/custom/prefix', function (req, res) {
             }
           }
         }
-    }
-   
-    }).then(function(resp) {
+    }}).then(function(resp) {
         console.log("Successful query! Here is the response:", resp);
         res.send(resp);
     }, function(err) {
@@ -155,23 +153,21 @@ app.get('/custom/prefix', function (req, res) {
   });
 
 //c. Genre Matching Endpoint:
-// http://localhost:3000/custom/genre?q="TV AND Comedy"
-// http://localhost:3000/custom/genre?q="TV AND (Horror OR Korean)"
+// http://localhost:3000/custom/genre?q=TV AND Horror
+// http://localhost:3000/custom/genre?q=TV AND (Horror OR Korean)
 // AND and OR must me all capital
 app.get('/custom/genre', function (req, res) {
-  
-  client.search({
+    var string=req.query.q
+    client.search({
     index: 'netflix',
     body: {
       "query": {
         "query_string" : {
-            "query" : req.query.q,
-            "default_field" : "listed_in"
+            "default_field" : "listed_in",
+            "query" : string
         }
       }
-    }
-   
-    }).then(function(resp) {
+    }}).then(function(resp) {
         console.log("Successful query! Here is the response:", resp);
         res.send(resp);
     }, function(err) {
@@ -184,54 +180,6 @@ app.get('/custom/genre', function (req, res) {
 //**************************************** part C End *****************************************/
 
 // Start listening for requests on port 3000
-app.listen(3000, function () {
+app.listen(process.env.PORT || 3000, function () {
   console.log('App listening for requests...');
 });
-
-/*app.get('/search-title/:title', (req, res)=>{
-    let query = {
-        index: 'netflix',
-        id: req.params.id
-    }
-    client.get(query)
-    .then(resp=>{
-        if(!resp){
-            return res.status(404).json({
-                product: resp
-            });
-        }
-
-        return res.status(200).json({
-            product: resp
-        });
-    }).catch(err => {
-        return res.status(500).json({
-            msg:'Error, not found',
-            err
-        });
-    });
-})*/
-/*app.get('/search-title/:title', function (req, res) {
-    // Access title like this: req.params.title
-
-    // Query using slop to allow for unexact matches 
-    client.search({
-    index: 'netflix',
-    type: 'string',
-    body: {
-      "query": {  
-        "match_phrase": {
-          "Title": { query: req.params.title, slop: 100 }
-        }
-      }
-    }
-   
-    }).then(function(resp) {
-        console.log("Successful query! Here is the response:", resp);
-        res.send(resp);
-    }, function(err) {
-        console.trace(err.message);
-        res.send(err.message);
-    });
-  });
-*/
