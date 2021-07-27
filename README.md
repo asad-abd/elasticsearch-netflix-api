@@ -2,12 +2,12 @@ Course Assignment for Information Retrieval
 
 ### DS 501: Assignment 1
 
-### Create a REST API which uses ElasticSearch for indexing and searching.
+## Create a REST API which uses ElasticSearch for indexing and searching.
 
 Create an index for this ​Netflix​ dataset. Use it to implement a Netflix search API with the
 following functionalities.
 
-## A. Auto Completion Endpoints ​:
+### A. Auto Completion Endpoints ​:
 
 a. _Endpoint for Adults:_ Returns top 5 results(suggestions) for a random text search
 i.e. when a user types the text “to”, it should return top 5 suggestion(docs)
@@ -17,14 +17,14 @@ searched text and then continue with your design.
 b. _Child Proof Endpoint:_ Same functionality as (a) with an additional constraint that
 it filters out all R, NC, PG rated Movies/TV shows from all search results.
 
-B. _Pagination (Sorted by release_year) Endpoint:_
+### B. Pagination (Sorted by release_year) Endpoint​:
 Netflix dataset contains a field “release_year”. Your task is to return PS (page size)
 number of Movies/TV show documents for a given page number i.e. If page size is 10
 and page number is 9, you will be returning Movies/TV show documents 81-90 sorted in
 descending order of release year. There will be separate end-points for Movies and TV
 Shows.
 
-_C. Custom Queries:_
+### C. Custom Queries​:
 
 a. _Exact match Endpoint:_ Return the Movies/TV shows matching exact names for
 the specified fields. Example - For specified ”director” field in the dataset return
